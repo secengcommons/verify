@@ -26,7 +26,7 @@ This bootstrap covers Go modules, shell scripts and GitHub workflows. Repository
 go install github.com/secengcommons/verify/cmd/secverify@v1.0.0-alpha4
 ```
 
-Requires Go 1.25 or newer
+Requires Go 1.26 or newer
 
 ## Use
 ```text
