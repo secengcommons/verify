@@ -163,11 +163,11 @@ Expected output is compared byte-for-byte. Displayed tool output preserves print
 
 State | Exit status
 --- | ---:
-`pass` | 0
-`fail` | 1
-`invocation_error` | 2
-`unavailable` | 3
-`cancelled` | 4
+pass | 0
+fail | 1
+invocation_error | 2
+unavailable | 3
+cancelled | 4
 
 Reporting failures are invocation errors
 
