@@ -18,7 +18,7 @@ jobs:
     name: Verify
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/verify.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/verify.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
     with:
       verify_source: true
 
@@ -26,7 +26,7 @@ jobs:
     name: Linux
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/linux.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/linux.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
     with:
       verify_source: true
 
@@ -34,7 +34,7 @@ jobs:
     name: Windows
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/windows.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/windows.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
     with:
       verify_source: true
 
@@ -42,7 +42,7 @@ jobs:
     name: macOS
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/macos.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/macos.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
     with:
       verify_source: true
 
@@ -50,7 +50,7 @@ jobs:
     name: Fuzz
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/fuzz.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/fuzz.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
     with:
       verify_source: true
 
@@ -58,19 +58,19 @@ jobs:
     name: Go ports
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/ports.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/ports.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   containers:
     name: Containers
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/containers.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/containers.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   alpine:
     name: Alpine Linux
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/alpine.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/alpine.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
     with:
       verify_source: true
 
@@ -78,33 +78,33 @@ jobs:
     name: BSD
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/bsd.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/bsd.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   illumos:
     name: illumos
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/illumos.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/illumos.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   solaris:
     name: Solaris
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/solaris.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/solaris.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   dependencies:
     name: Dependencies
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
-    uses: secengcommons/ci/.github/workflows/dependencies.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/dependencies.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   codeql:
     name: CodeQL
     permissions:
       contents: read
       security-events: read
-    uses: secengcommons/ci/.github/workflows/codeql.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    uses: secengcommons/ci/.github/workflows/codeql.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   required:
     name: Required

@@ -24,7 +24,6 @@ const proctreeModule = "github.com/secengcommons/proctree"
 const qualifiedProctreeVersion = "v1.0.0"
 const yamlModule = "go.yaml.in/yaml/v3"
 const qualifiedYAMLVersion = "v3.0.5"
-const semanticVersionComponents = 3
 
 var exitProcess = os.Exit
 var standardOutput io.Writer = os.Stdout

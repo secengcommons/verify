@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"runtime/debug"
 	"strings"
 	"testing"
@@ -21,6 +22,25 @@ func TestIdentityFromBuild(t *testing.T) {
 	if identity = identityFromBuild(developmentVersion, gitBuildInfo(sha256, "false"), true); identity.source != "commit:"+sha256 {
 		t.Fatalf("SHA-256 identity = %#v", identity)
 	}
+	module := releasedBuildInfo()
+	module.Main.Version = "v1.0.0-alpha1"
+	module.Main.Sum = moduleSum(1)
+	if identity = identityFromBuild("1.0.0-alpha1", module, true); identity.source != "module:v1.0.0-alpha1@"+module.Main.Sum {
+		t.Fatalf("module identity = %#v", identity)
+	}
+	for _, mutate := range []func(*debug.BuildInfo){
+		func(value *debug.BuildInfo) { value.Main.Path = "example.test/verify" },
+		func(value *debug.BuildInfo) { value.Main.Version = "v1.0.0-alpha2" },
+		func(value *debug.BuildInfo) { value.Main.Sum = "invalid" },
+		func(value *debug.BuildInfo) { value.Main.Replace = &debug.Module{Path: verifyModule} },
+		func(value *debug.BuildInfo) { value.Settings = []debug.BuildSetting{{Key: "vcs", Value: "git"}} },
+	} {
+		candidate := *module
+		mutate(&candidate)
+		if identity = identityFromBuild("1.0.0-alpha1", &candidate, true); identity.source != unavailableSource {
+			t.Fatalf("invalid module identity = %#v", identity)
+		}
+	}
 	for _, information := range []*debug.BuildInfo{
 		nil,
 		{},
@@ -37,6 +57,14 @@ func TestIdentityFromBuild(t *testing.T) {
 			t.Fatalf("unavailable identity = %#v", got)
 		}
 	}
+}
+
+func moduleSum(value byte) string {
+	digest := make([]byte, 32)
+	for index := range digest {
+		digest[index] = value
+	}
+	return "h1:" + base64.StdEncoding.EncodeToString(digest)
 }
 
 func gitBuildInfo(revision, modified string) *debug.BuildInfo {
