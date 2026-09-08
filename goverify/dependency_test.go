@@ -54,6 +54,13 @@ func TestCheckModuleCurrencySelectsDeclaredTools(t *testing.T) {
 func TestCheckModuleCurrencyRejectsDirectUpdate(t *testing.T) {
 	root := t.TempDir()
 	tool := Tool{Executable: testExecutable(t), Timeout: time.Minute, OutputLimit: MaxRepositoryCommandBytes}
+	current := moduleList(
+		`{"Path":"example.test/root","Main":true}`,
+		`{"Path":"example.test/dependency","Version":"v1.0.0"}`,
+	)
+	if err := checkModuleCurrencyWith(t.Context(), root, tool, Module{}, dependencyRunner(t, root, root, current)); err != nil {
+		t.Fatalf("current direct dependency error = %v", err)
+	}
 	source := moduleList(
 		`{"Path":"example.test/root","Main":true}`,
 		`{"Path":"example.test/dependency","Version":"v1.0.0","Update":{"Path":"example.test/dependency","Version":"v1.1.0"}}`,
