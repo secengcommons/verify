@@ -54,7 +54,7 @@ func checkModuleCurrencyWith(ctx context.Context, root string, tool Tool, module
 		return err
 	}
 	for _, dependency := range modules {
-		if dependency.Main || !module.Production && dependency.Indirect && !toolOwners[dependency.Path] {
+		if dependency.Main || dependency.Indirect && !toolOwners[dependency.Path] {
 			continue
 		}
 		if len(dependency.Retracted) != 0 {

@@ -28,8 +28,8 @@ func TestCheckModuleCurrency(t *testing.T) {
 		`{"Path":"example.test/root","Main":true}`,
 		`{"Path":"example.test/dependency","Version":"v1.0.0","Indirect":true,"Update":{"Path":"example.test/dependency","Version":"v1.1.0"}}`,
 	)
-	if err := checkModuleCurrencyWith(t.Context(), root, tool, Module{Directory: "module", Production: true}, dependencyRunner(t, root, filepath.Join(root, "module"), outdated)); !errors.Is(err, ErrDependencyCurrency) {
-		t.Fatalf("production update error = %v", err)
+	if err := checkModuleCurrencyWith(t.Context(), root, tool, Module{Directory: "module", Production: true}, dependencyRunner(t, root, filepath.Join(root, "module"), outdated)); err != nil {
+		t.Fatalf("transitive update error = %v", err)
 	}
 }
 

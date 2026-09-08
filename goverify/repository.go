@@ -23,7 +23,7 @@ type Module struct {
 	Name       string   // Name is printable output ownership
 	Packages   []string // Packages is the ordered package argument set
 	Tools      []string // Tools is the ordered tool package set
-	Production bool     // Production includes indirect dependency currency checks
+	Production bool     // Production reports that the package set contains non-test source
 }
 
 // Compatibility describes one Go toolchain and its admitted test scopes
