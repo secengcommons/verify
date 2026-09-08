@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/verify.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    with:
+      verify_source: true
+
+  linux:
+    name: Linux
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/linux.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    with:
+      verify_source: true
+
+  windows:
+    name: Windows
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/windows.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    with:
+      verify_source: true
+
+  macos:
+    name: macOS
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/macos.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    with:
+      verify_source: true
+
+  fuzz:
+    name: Fuzz
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/fuzz.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    with:
+      verify_source: true
+
+  ports:
+    name: Go ports
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/ports.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  containers:
+    name: Containers
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/containers.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  alpine:
+    name: Alpine Linux
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/alpine.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+    with:
+      verify_source: true
+
+  bsd:
+    name: BSD
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/bsd.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  illumos:
+    name: illumos
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/illumos.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  solaris:
+    name: Solaris
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/solaris.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  dependencies:
+    name: Dependencies
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    uses: secengcommons/ci/.github/workflows/dependencies.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  codeql:
+    name: CodeQL
+    permissions:
+      contents: read
+      security-events: read
+    uses: secengcommons/ci/.github/workflows/codeql.yml@dcaedcc94ea63630018d9af182b85fde08e6694b # v1.0.6
+
+  required:
+    name: Required
+    if: ${{ always() }}
+    needs: [verify, linux, windows, macos, fuzz, ports, containers, alpine, bsd, illumos, solaris, dependencies, codeql]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Check jobs
+        env:
+          EVENT: ${{ github.event_name }}
+          RESULTS: ${{ toJSON(needs) }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          results = json.loads(os.environ["RESULTS"])
+          expected = {name: "success" for name in results}
+          if os.environ["EVENT"] != "pull_request":
+              expected["dependencies"] = "skipped"
+          failed = {name: result["result"] for name, result in results.items() if result["result"] != expected[name]}
+          if failed:
+              for name in sorted(failed):
+                  print(f"{name}: {failed[name]}")
+              raise SystemExit(1)
+          PY
