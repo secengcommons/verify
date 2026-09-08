@@ -1,0 +1,8 @@
+github.com/secengcommons/cli v1.0.0 h1:gw5Azo7JS2FyKEw5hP/km2gTEHYqjMq+kGZ67N+U9jc=
+github.com/secengcommons/cli v1.0.0/go.mod h1:Zvkmis6cmgYnH6wBx9UUeITTYgJ+EooI0xioYIsmoB0=
+github.com/secengcommons/proctree v1.0.0 h1:T6VOfeZWGMg1u2HosQ4q26qFaRID3mpAR8GwJciGsXQ=
+github.com/secengcommons/proctree v1.0.0/go.mod h1:MJNaC9oFi1+BSDs6Phok1X8BV/pqjymh1aQql3M0w30=
+go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
+go.yaml.in/yaml/v3 v3.0.5/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
+golang.org/x/sys v0.47.0 h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs=
+golang.org/x/sys v0.47.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
