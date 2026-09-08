@@ -142,7 +142,7 @@ Internal coverage, compile, fuzz, benchmark, workflow and dependency controls re
 
 ## Output
 
-The first line reports the executable version, source state, Go version and platform. Each control reports its position and result with elapsed time. The profile ends with one acknowledgement:
+The first line reports the executable version, source state, Go version and platform. Repository builds identify their Git commit; released Go tools identify their module version and checksum. Each control reports its position and result with elapsed time. The profile ends with one acknowledgement:
 ```text
 secverify 0.1.0 source=commit:0123456789abcdef0123456789abcdef01234567 go=go1.27.1 platform=linux/amd64
 profile=test controls=2

@@ -1,15 +1,23 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"runtime"
 	"runtime/debug"
 	"strings"
+
+	"golang.org/x/mod/module"
+	"golang.org/x/mod/semver"
 )
 
 const unavailableSource = "unavailable"
 const gitCommitHexLength = 40
 const gitSHA256HexLength = 64
 const maxIdentityTextBytes = 128
+const encodedSHA256Bytes = (sha256.Size + 2) / 3 * 4
+const moduleSumTextBytes = len("h1:") + encodedSHA256Bytes
+const maxModuleVersionBytes = maxIdentityTextBytes - len("module:") - len("@") - moduleSumTextBytes
 
 type executableIdentity struct {
 	version   string
@@ -30,8 +38,36 @@ func identityFromBuild(version string, information *debug.BuildInfo, available b
 	}
 	if available && information != nil {
 		identity.source = sourceIdentity(information.Settings)
+		if identity.source == unavailableSource && !hasVCSMetadata(information.Settings) {
+			identity.source = moduleSourceIdentity(information.Main, version)
+		}
 	}
 	return identity
+}
+
+func hasVCSMetadata(settings []debug.BuildSetting) bool {
+	for _, setting := range settings {
+		if setting.Key == "vcs" || setting.Key == "vcs.revision" || setting.Key == "vcs.modified" {
+			return true
+		}
+	}
+	return false
+}
+
+func moduleSourceIdentity(main debug.Module, version string) string {
+	if version == developmentVersion || main.Path != verifyModule || main.Version != "v"+version || main.Replace != nil || !validModuleSum(main.Sum) {
+		return unavailableSource
+	}
+	return "module:" + main.Version + "@" + main.Sum
+}
+
+func validModuleSum(value string) bool {
+	encoded, found := strings.CutPrefix(value, "h1:")
+	if !found {
+		return false
+	}
+	digest, err := base64.StdEncoding.DecodeString(encoded)
+	return err == nil && len(digest) == sha256.Size && base64.StdEncoding.EncodeToString(digest) == encoded
 }
 
 type sourceMetadata struct {
@@ -135,29 +171,6 @@ func releasedDependency(information *debug.BuildInfo, path, version string) bool
 }
 
 func releasedVersion(version string) bool {
-	if !strings.HasPrefix(version, "v") {
-		return false
-	}
-	components := strings.Split(version[1:], ".")
-	if len(components) != semanticVersionComponents {
-		return false
-	}
-	for _, component := range components {
-		if !validVersionComponent(component) {
-			return false
-		}
-	}
-	return version != "v0.0.0"
-}
-
-func validVersionComponent(component string) bool {
-	if component == "" || len(component) > 1 && component[0] == '0' {
-		return false
-	}
-	for _, character := range component {
-		if character < '0' || character > '9' {
-			return false
-		}
-	}
-	return true
+	return len(version) <= maxModuleVersionBytes && version != "v0.0.0" && semver.IsValid(version) && semver.Canonical(version) == version &&
+		!module.IsPseudoVersion(version)
 }

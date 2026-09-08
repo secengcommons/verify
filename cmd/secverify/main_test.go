@@ -205,6 +205,8 @@ func TestReleasedVersion(t *testing.T) {
 	}{
 		{version: "v1.0.0", valid: true},
 		{version: "v0.1.0", valid: true},
+		{version: "v1.0.0-alpha1", valid: true},
+		{version: "v1.0.0-rc.1", valid: true},
 		{version: ""},
 		{version: "1.0.0"},
 		{version: "v1.0"},
@@ -212,7 +214,9 @@ func TestReleasedVersion(t *testing.T) {
 		{version: "v01.0.0"},
 		{version: "v1.a.0"},
 		{version: "v0.0.0"},
-		{version: "v1.0.0-rc.1"},
+		{version: "v1.0.0+build"},
+		{version: "v1.0.0-20260908120000-0123456789ab"},
+		{version: "v1.0.0-" + strings.Repeat("a", maxModuleVersionBytes)},
 	}
 	for _, test := range tests {
 		if actual := releasedVersion(test.version); actual != test.valid {
