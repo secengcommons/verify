@@ -103,7 +103,7 @@ jobs:
     name: CodeQL
     permissions:
       contents: read
-      security-events: read
+      security-events: write
     uses: secengcommons/ci/.github/workflows/codeql.yml@53ce8047adb206d19c75e2e49efcaf86932fa65b # v1.0.6
 
   required:
