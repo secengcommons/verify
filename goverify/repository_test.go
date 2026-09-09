@@ -241,7 +241,7 @@ func TestDiscoveredModuleControlBoundaries(t *testing.T) {
 		t.Fatalf("test-only vulnerabilities = %#v", got)
 	}
 	if moduleLinterConfig("", ".golangci.yml") != ".golangci.yml" ||
-		moduleLinterConfig("tools/workflow", ".golangci.yml") != "../../.golangci.yml" {
+		moduleLinterConfig("tools/actionlint", ".golangci.yml") != "../../.golangci.yml" {
 		t.Fatal("module linter configuration differs")
 	}
 }
