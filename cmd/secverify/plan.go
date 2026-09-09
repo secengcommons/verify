@@ -21,7 +21,6 @@ const defaultFuzzWork = "100000x"
 const defaultFuzzParallelism = 2
 const defaultFuzzJobs = 2
 const controlTimeout = 5 * time.Minute
-const campaignTimeout = 2 * time.Minute
 const repositorySourceControlKinds = 4
 const golangCILintTool = "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
 const govulncheckTool = "golang.org/x/vuln/cmd/govulncheck"
@@ -143,7 +142,6 @@ func selectedFuzzCampaign(profile string, tool goverify.Tool) (goverify.Campaign
 	if profile == "campaign" || profile == "all" {
 		return fuzzCampaign(tool)
 	}
-	tool.Timeout = campaignTimeout
 	return goverify.Campaign{Go: tool, Duration: defaultFuzzWork, Parallelism: defaultFuzzParallelism, Jobs: defaultFuzzJobs}, nil
 }
 
@@ -377,6 +375,5 @@ func fuzzCampaign(tool goverify.Tool) (goverify.Campaign, error) {
 		}
 		parallelism = parsed
 	}
-	tool.Timeout = campaignTimeout
 	return goverify.Campaign{Go: tool, Duration: work, Parallelism: parallelism, Jobs: defaultFuzzJobs}, nil
 }

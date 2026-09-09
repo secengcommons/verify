@@ -294,10 +294,14 @@ func TestSelectedEnvironment(t *testing.T) {
 }
 
 func TestPlanHelpers(t *testing.T) {
-	tool := goverify.Tool{}
+	tool := goverify.Tool{Timeout: controlTimeout}
 	campaign, err := fuzzCampaign(tool)
-	if err != nil || campaign.Duration != defaultFuzzWork || campaign.Parallelism != defaultFuzzParallelism || campaign.Go.Timeout != campaignTimeout {
+	if err != nil || campaign.Duration != defaultFuzzWork || campaign.Parallelism != defaultFuzzParallelism || campaign.Go.Timeout != tool.Timeout {
 		t.Fatalf("fuzzCampaign = (%#v, %v)", campaign, err)
+	}
+	campaign, err = selectedFuzzCampaign("test", tool)
+	if err != nil || campaign.Go.Timeout != tool.Timeout {
+		t.Fatalf("selectedFuzzCampaign = (%#v, %v)", campaign, err)
 	}
 }
 
