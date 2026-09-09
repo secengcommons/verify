@@ -1,5 +1,5 @@
-github.com/secengcommons/cli v1.0.0 h1:gw5Azo7JS2FyKEw5hP/km2gTEHYqjMq+kGZ67N+U9jc=
-github.com/secengcommons/cli v1.0.0/go.mod h1:Zvkmis6cmgYnH6wBx9UUeITTYgJ+EooI0xioYIsmoB0=
+github.com/secengcommons/cli v1.1.0 h1:kgfPivrdeFSM3b1zkMrHRiESO+RWOIcBFRD01q57FqI=
+github.com/secengcommons/cli v1.1.0/go.mod h1:mB4Fpy9Dfpal6j1eXTuPA25f1YE7nB95gCiugrAapbk=
 github.com/secengcommons/proctree v1.1.0 h1:yGfBpAdORgG8OWKdlofT/G9jMDJSC42yON/b0maXNXc=
 github.com/secengcommons/proctree v1.1.0/go.mod h1:64mNFMhgsB1k63f6L8yRLG+5/sc8r6UHuSZIxvtPkbY=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
