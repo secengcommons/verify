@@ -25,8 +25,8 @@ func TestDiscoverRepository(t *testing.T) {
 	writeDiscoveryFile(t, root, "value.go", "package root\n")
 	writeDiscoveryFile(t, root, ".golangci.yml", "version: '2'\n")
 	writeDiscoveryFile(t, root, "tools/go.mod", "module example.test/root/tools\n\ngo 1.25.0\ntoolchain go1.26.6\n\ntool example.test/tool/cmd/check\n\nrequire example.test/tool v0.0.0\n")
-	writeDiscoveryFile(t, root, "tools/workflow/go.mod", "module example.test/root/tools/workflow\n\ngo 1.26.0\ntoolchain go1.26.6\n")
-	writeDiscoveryFile(t, root, "tools/workflow/check.go", "package workflow\n")
+	writeDiscoveryFile(t, root, "tools/actionlint/go.mod", "module example.test/root/tools/actionlint\n\ngo 1.26.0\ntoolchain go1.26.6\n")
+	writeDiscoveryFile(t, root, "tools/actionlint/check.go", "package actionlint\n")
 	writeDiscoveryFile(t, root, ".github/scripts/check.sh", "#!/bin/sh\n")
 	writeDiscoveryFile(t, root, ".github/workflows/core.yml", "name: Core\n")
 	writeDiscoveryFile(t, root, "testdata/ignored/go.mod", "module ignored.test/testdata\n\ngo 1.24.0\n")
@@ -40,7 +40,7 @@ func TestDiscoverRepository(t *testing.T) {
 	want := []RepositoryModule{
 		{Directory: ".", Path: "example.test/root", GoVersion: "1.24.0", Toolchain: "go1.26.6", HasPackages: true, HasProduction: true},
 		{Directory: "tools", Path: "example.test/root/tools", GoVersion: "1.25.0", Toolchain: "go1.26.6", Tools: []string{"example.test/tool/cmd/check"}},
-		{Directory: "tools/workflow", Path: "example.test/root/tools/workflow", GoVersion: "1.26.0", Toolchain: "go1.26.6", HasPackages: true, HasProduction: true},
+		{Directory: "tools/actionlint", Path: "example.test/root/tools/actionlint", GoVersion: "1.26.0", Toolchain: "go1.26.6", HasPackages: true, HasProduction: true},
 	}
 	if !reflect.DeepEqual(inventory.Modules, want) {
 		t.Fatalf("modules = %#v", inventory.Modules)
