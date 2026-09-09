@@ -21,7 +21,7 @@ const verifyModule = "github.com/secengcommons/verify"
 const cliModule = "github.com/secengcommons/cli"
 const qualifiedCLIVersion = "v1.0.0"
 const proctreeModule = "github.com/secengcommons/proctree"
-const qualifiedProctreeVersion = "v1.0.0"
+const qualifiedProctreeVersion = "v1.1.0"
 const yamlModule = "go.yaml.in/yaml/v3"
 const qualifiedYAMLVersion = "v3.0.5"
 
