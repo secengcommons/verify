@@ -835,36 +835,38 @@ func TestTemporaryCleanupLifecycle(t *testing.T) {
 	tool := discoveryGoTool(t)
 	tool.Environment = ReplaceEnvironment(tool.Environment, "GOTOOLCHAIN", "local")
 	scope := TestScope{Name: "Root", Packages: []string{"./..."}}
-	for _, test := range []struct {
-		name    string
-		timeout time.Duration
-		context func() (context.Context, context.CancelFunc)
-	}{
-		{name: "timeout", timeout: 100 * time.Millisecond, context: func() (context.Context, context.CancelFunc) {
-			return context.WithTimeout(t.Context(), time.Second)
-		}},
-		{name: "cancellation", timeout: time.Minute, context: func() (context.Context, context.CancelFunc) {
-			return context.WithTimeout(t.Context(), 100*time.Millisecond)
-		}},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			ctx, cancel := test.context()
-			defer cancel()
-			operationTool := tool
-			operationTool.Timeout = test.timeout
-			operations := repositoryOperations{
-				createTemp: func(_, pattern string) (*os.File, error) { return os.CreateTemp(temporary, pattern) },
-				validate:   verify.Validate, run: proctree.Run, open: os.Open,
-				remove: removeRepositoryCoverage, check: CheckCoverage,
-			}
-			if err := runCoverageWith(ctx, root, operationTool, scope, io.Discard, operations); err == nil {
-				t.Fatal("interrupted coverage passed")
-			}
-			entries, err := os.ReadDir(temporary)
-			if err != nil || len(entries) != 0 {
-				t.Fatalf("coverage residue = (%v, %v)", entries, err)
-			}
-		})
+	base := repositoryOperations{
+		createTemp: func(_, pattern string) (*os.File, error) { return os.CreateTemp(temporary, pattern) },
+		validate:   verify.Validate, run: proctree.Run, open: os.Open,
+		remove: removeRepositoryCoverage, check: CheckCoverage,
+	}
+	t.Run("timeout", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+		defer cancel()
+		operationTool := tool
+		operationTool.Timeout = 100 * time.Millisecond
+		assertInterruptedCoverageCleanup(t, ctx, root, temporary, operationTool, scope, base)
+	})
+	t.Run("cancellation", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(t.Context())
+		defer cancel()
+		operations := base
+		operations.run = func(ctx context.Context, command proctree.Command) (proctree.Result, error) {
+			cancel()
+			return proctree.Run(ctx, command)
+		}
+		assertInterruptedCoverageCleanup(t, ctx, root, temporary, tool, scope, operations)
+	})
+}
+
+func assertInterruptedCoverageCleanup(t *testing.T, ctx context.Context, root, temporary string, tool Tool, scope TestScope, operations repositoryOperations) {
+	t.Helper()
+	if err := runCoverageWith(ctx, root, tool, scope, io.Discard, operations); err == nil {
+		t.Fatal("interrupted coverage passed")
+	}
+	entries, err := os.ReadDir(temporary)
+	if err != nil || len(entries) != 0 {
+		t.Fatalf("coverage residue = (%v, %v)", entries, err)
 	}
 }
 
