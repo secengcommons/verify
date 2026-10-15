@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
 
 	"github.com/secengcommons/proctree"
@@ -20,10 +21,17 @@ type dependencyModule struct {
 	Main      bool
 	Indirect  bool
 	Retracted []string
+	Replace   *dependencyReplacement
 	Update    *struct {
 		Path    string
 		Version string
 	}
+}
+
+type dependencyReplacement struct {
+	Path    string
+	Version string
+	Dir     string
 }
 
 // CheckModuleCurrency requires the selected module dependency graph to have no applicable update
@@ -53,8 +61,29 @@ func checkModuleCurrencyWith(ctx context.Context, root string, tool Tool, module
 	if err != nil {
 		return err
 	}
+	if err = requireCurrentDependencies(root, modules, toolOwners); err != nil {
+		return err
+	}
+	if err := ctx.Err(); err != nil {
+		return errors.Join(ErrDependencyCurrency, err)
+	}
+	return nil
+}
+
+func requireCurrentDependencies(root string, modules []dependencyModule, toolOwners map[string]bool) error {
+	canonicalRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		return errors.Join(ErrDependencyCurrency, err)
+	}
 	for _, dependency := range modules {
 		if dependency.Main || dependency.Indirect && !toolOwners[dependency.Path] {
+			continue
+		}
+		sourceOwned, ownershipErr := sourceOwnedDependency(canonicalRoot, dependency)
+		if ownershipErr != nil {
+			return ownershipErr
+		}
+		if sourceOwned {
 			continue
 		}
 		if len(dependency.Retracted) != 0 {
@@ -64,9 +93,6 @@ func checkModuleCurrencyWith(ctx context.Context, root string, tool Tool, module
 			continue
 		}
 		return fmt.Errorf("%w: %s %s to %s", ErrDependencyCurrency, dependency.Path, dependency.Version, dependency.Update.Version)
-	}
-	if err := ctx.Err(); err != nil {
-		return errors.Join(ErrDependencyCurrency, err)
 	}
 	return nil
 }
@@ -101,7 +127,32 @@ func validDependencyModule(module dependencyModule) bool {
 	if !validFuzzText(module.Path) || len(module.Path) > MaxFuzzPathBytes || !module.Main && !validFuzzText(module.Version) {
 		return false
 	}
-	return module.Update == nil || module.Update.Path == module.Path && validFuzzText(module.Update.Version)
+	return validDependencyReplacement(module.Replace) &&
+		(module.Update == nil || module.Update.Path == module.Path && validFuzzText(module.Update.Version))
+}
+
+func validDependencyReplacement(replacement *dependencyReplacement) bool {
+	if replacement == nil {
+		return true
+	}
+	return replacement.Path != "" && validFuzzText(replacement.Path) && len(replacement.Path) <= MaxFuzzPathBytes &&
+		(replacement.Version == "" || validFuzzText(replacement.Version)) &&
+		replacement.Dir != "" && filepath.IsAbs(replacement.Dir) && validFuzzText(replacement.Dir) && len(replacement.Dir) <= MaxFuzzPathBytes
+}
+
+func sourceOwnedDependency(root string, module dependencyModule) (bool, error) {
+	if module.Replace == nil || module.Replace.Version != "" {
+		return false, nil
+	}
+	directory, err := filepath.EvalSymlinks(module.Replace.Dir)
+	if err != nil {
+		return false, errors.Join(ErrDependencyCurrency, err)
+	}
+	relative, err := filepath.Rel(root, directory)
+	if err != nil || !validRelativeDirectory(relative) {
+		return false, errors.Join(ErrDependencyCurrency, err)
+	}
+	return true, nil
 }
 
 func dependencyToolOwners(modules []dependencyModule, tools []string) (map[string]bool, error) {

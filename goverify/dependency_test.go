@@ -3,6 +3,8 @@ package goverify
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -67,6 +69,53 @@ func TestCheckModuleCurrencyRejectsDirectUpdate(t *testing.T) {
 	)
 	if err := checkModuleCurrencyWith(t.Context(), root, tool, Module{}, dependencyRunner(t, root, root, source)); !errors.Is(err, ErrDependencyCurrency) {
 		t.Fatalf("direct update error = %v", err)
+	}
+}
+
+func TestCheckModuleCurrencyClassifiesLocalReplacements(t *testing.T) {
+	root := t.TempDir()
+	outside := t.TempDir()
+	tool := Tool{Executable: testExecutable(t), Timeout: time.Minute, OutputLimit: MaxRepositoryCommandBytes}
+	module := Module{Directory: "module", Production: true}
+	moduleRoot := filepath.Join(root, "module")
+	if err := os.Mkdir(moduleRoot, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for name, replacement := range map[string]string{
+		"root":  root,
+		"child": moduleRoot,
+	} {
+		t.Run(name, func(t *testing.T) {
+			source := moduleList(
+				`{"Path":"example.test/differential","Main":true}`,
+				fmt.Sprintf(`{"Path":"example.test/root","Version":"v1.0.0","Replace":{"Path":"..","Dir":%q},"Update":{"Path":"example.test/root","Version":"v1.1.0"}}`, replacement),
+			)
+			if err := checkModuleCurrencyWith(t.Context(), root, tool, module, dependencyRunner(t, root, moduleRoot, source)); err != nil {
+				t.Fatalf("source-owned replacement error = %v", err)
+			}
+		})
+	}
+	source := moduleList(
+		`{"Path":"example.test/differential","Main":true}`,
+		fmt.Sprintf(`{"Path":"example.test/root","Version":"v1.0.0","Replace":{"Path":"../outside","Dir":%q}}`, outside),
+	)
+	if err := checkModuleCurrencyWith(t.Context(), root, tool, module, dependencyRunner(t, root, moduleRoot, source)); !errors.Is(err, ErrDependencyCurrency) {
+		t.Fatalf("external local replacement error = %v", err)
+	}
+}
+
+func TestRequireCurrentDependenciesRejectsMissingRoot(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "missing")
+	if err := requireCurrentDependencies(missing, []dependencyModule{{Path: "example.test/root", Main: true}}, nil); !errors.Is(err, ErrDependencyCurrency) {
+		t.Fatalf("missing root error = %v", err)
+	}
+}
+
+func TestSourceOwnedDependencyRejectsMissingReplacement(t *testing.T) {
+	root := t.TempDir()
+	module := dependencyModule{Replace: &dependencyReplacement{Path: "../missing", Dir: filepath.Join(root, "missing")}}
+	if _, err := sourceOwnedDependency(root, module); !errors.Is(err, ErrDependencyCurrency) {
+		t.Fatalf("missing replacement error = %v", err)
 	}
 }
 
